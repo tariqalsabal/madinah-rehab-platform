@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatsBand } from "@/components/StatsBand";
+import { Reveal } from "@/components/Reveal";
 import {
   Users, Building2, GraduationCap, Briefcase, HandHeart,
   Search, FileCheck, Award, UserPlus, ArrowLeft,
@@ -20,9 +21,9 @@ export default function HomePage() {
     { icon: Award, t: "توظيف وخطابات", d: "خطابات تعريف موثّقة برمز QR ومتابعة حتى التوظيف." },
   ];
   const donations = [
-    { icon: Briefcase, t: "تبرع وظيفي", d: "شركة تتبرّع بعدد وظائف (مثال: 10 محاسب، 20 مبيعات)." },
-    { icon: GraduationCap, t: "تبرع تدريبي", d: "معهد يقدّم مقاعد مجانية أو خصماً 50%/100% أو منحة." },
-    { icon: HandHeart, t: "تبرع توظيفي", d: "شركة توظيف توفّر فرصاً أو ترعى عملية التوظيف كاملة." },
+    { icon: Briefcase, t: "تبرع وظيفي", d: "شركة تتبرّع بعدد وظائف (مثال: 10 محاسب، 20 مبيعات).", href: "/donate?type=JOB" },
+    { icon: GraduationCap, t: "تبرع تدريبي", d: "معهد يقدّم مقاعد مجانية أو خصماً 50%/100% أو منحة.", href: "/donate?type=TRAINING" },
+    { icon: HandHeart, t: "تبرع توظيفي", d: "شركة توظيف توفّر فرصاً أو ترعى عملية التوظيف كاملة.", href: "/donate?type=RECRUITMENT" },
   ];
 
   return (
@@ -75,7 +76,7 @@ export default function HomePage() {
       </section>
 
       {/* كيف تعمل المنصة */}
-      <section>
+      <Reveal><section>
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-brand-dark md:text-3xl">كيف تعمل المنصة؟</h2>
           <p className="mt-2 text-muted-foreground">أربع خطوات من التسجيل إلى التوظيف.</p>
@@ -92,29 +93,33 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </section></Reveal>
 
       {/* أنواع التبرعات */}
-      <section className="rounded-3xl bg-brand-light p-8 md:p-12">
+      <Reveal><section className="rounded-3xl bg-brand-light p-8 md:p-12">
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-brand-dark md:text-3xl">مفهوم جديد للتبرّع</h2>
           <p className="mt-2 text-muted-foreground">عطاءٌ يصنع وظائف وفرص تدريب، لا مجرّد مبالغ.</p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {donations.map((d) => (
-            <div key={d.t} className="rounded-xl border-t-4 border-t-gold bg-white p-6 shadow-sm">
+            <Link key={d.t} href={d.href} className="group rounded-xl border-t-4 border-t-gold bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
               <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-light text-gold-dark">
                 <d.icon size={24} />
               </span>
               <h3 className="mt-4 font-semibold text-brand-dark">{d.t}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{d.d}</p>
-            </div>
+              <span className="mt-3 inline-block text-sm font-medium text-gold-dark transition group-hover:translate-x-1">تبرّع الآن ←</span>
+            </Link>
           ))}
         </div>
-      </section>
+        <div className="mt-6 text-center">
+          <Link href="/donate" className="btn-gold">تعرّف على أنواع التبرّع</Link>
+        </div>
+      </section></Reveal>
 
       {/* الجمهور المستهدف */}
-      <section>
+      <Reveal><section>
         <div className="mb-8 text-center">
           <h2 className="text-2xl font-bold text-brand-dark md:text-3xl">انضمّ إلى المنصة</h2>
           <p className="mt-2 text-muted-foreground">اختر دورك وابدأ الآن.</p>
@@ -130,14 +135,14 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
-      </section>
+      </section></Reveal>
 
       {/* CTA */}
-      <section className="brand-gradient flex flex-col items-center gap-4 rounded-3xl p-10 text-center text-white">
+      <Reveal><section className="brand-gradient flex flex-col items-center gap-4 rounded-3xl p-10 text-center text-white">
         <h2 className="text-2xl font-bold md:text-3xl">جاهز لتبدأ رحلتك؟</h2>
         <p className="max-w-xl text-white/85">سجّل اليوم وكن جزءاً من منظومة تأهيل وتوظيف موثوقة في المدينة المنورة.</p>
         <Link href="/register" className="btn-gold mt-2">إنشاء حساب مجاني</Link>
-      </section>
+      </section></Reveal>
     </div>
   );
 }

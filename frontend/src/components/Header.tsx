@@ -11,6 +11,7 @@ const NAV = [
   { h: "/jobs", t: "الوظائف" },
   { h: "/programs", t: "البرامج" },
   { h: "/companies", t: "الشركاء" },
+  { h: "/donate", t: "تبرّع" },
   { h: "/about", t: "عن الجمعية" },
   { h: "/success-stories", t: "قصص نجاح" },
   { h: "/faq", t: "الأسئلة" },

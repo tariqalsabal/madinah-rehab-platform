@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
+import { Cairo, Tajawal } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/Header";
 
 const cairo = Cairo({ subsets: ["arabic", "latin"], variable: "--font-cairo" });
+const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700"], variable: "--font-tajawal" });
 
 export const metadata: Metadata = {
   title: "منصة التأهيل والتوظيف | مستودع المدينة المنورة الخيري",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable}>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${tajawal.variable}`}>
       <body className="flex min-h-screen flex-col font-sans antialiased">
         <Providers>
           <Header />

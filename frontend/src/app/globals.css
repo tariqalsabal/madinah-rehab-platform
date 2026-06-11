@@ -29,6 +29,12 @@ body {
   color: hsl(var(--foreground));
   direction: rtl;
 }
+/* العناوين بخط تجوّل الأنيق، والنص بخط القاهرة المريح */
+h1, h2, h3 { font-family: var(--font-tajawal), var(--font-cairo), sans-serif; letter-spacing: -0.01em; }
+
+/* حركة ظهور لطيفة لأي عنصر */
+@keyframes re-fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: re-fade-up 0.6s ease both; }
 
 /* تدرّج هوية الجمعية (أخضر المنارة ← أخضر القمح) */
 .brand-gradient { background-image: linear-gradient(135deg, #136138 0%, #1f8a4c 55%, #5cb335 100%); }

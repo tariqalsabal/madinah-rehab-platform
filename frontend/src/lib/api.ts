@@ -124,6 +124,9 @@ function uploadFile(path: string, uid: number, doc_type: string, title: string, 
 export const PublicApi = {
   org: (id: number) => api.get(`/organizations/${id}`).then((r) => one<any>(r.data)),
   support: () => api.get(`/support-contact`).then((r) => one<any>(r.data)),
+  orgJobs: (id: number) => api.get(`/organizations/${id}/jobs`).then((r) => feed<any>(r.data)),
+  orgPrograms: (id: number) => api.get(`/organizations/${id}/programs`).then((r) => feed<any>(r.data)),
+  orgDonations: (id: number) => api.get(`/organizations/${id}/donations`).then((r) => feed<any>(r.data)),
 };
 
 // البروفايل والمرفقات
@@ -154,7 +157,7 @@ export const MessagesApi = {
   conversations: (uid: number) => api.get(`/me/conversations`, { params: { uid } }).then((r) => feed<any>(r.data)),
   thread: (uid: number, peer: number) => api.get(`/messages`, { params: { uid, peer } }).then((r) => (Array.isArray(r.data) ? r.data : [])),
   send: (from_uid: number, to_uid: number, body: string, application_id?: number) =>
-    api.post(`/messages`, { from_uid, to_uid, body, application_id }).then((r) => r.data),
+    api.post(`/messages`, { from_uid, to_uid, msg_body: body, application_id: application_id ?? null }).then((r) => r.data),
 };
 
 // الإشعارات
