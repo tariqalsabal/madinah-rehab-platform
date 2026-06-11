@@ -1,42 +1,40 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { DashboardApi } from "@/lib/api";
-import type { DashboardKpis } from "@/lib/types";
+import Link from "next/link";
+import { useMe } from "@/lib/useMe";
+import AdminDashboard from "@/components/dashboards/AdminDashboard";
+import BeneficiaryDashboard from "@/components/dashboards/BeneficiaryDashboard";
+import CompanyDashboard from "@/components/dashboards/CompanyDashboard";
+import InstituteDashboard from "@/components/dashboards/InstituteDashboard";
+import DonorDashboard from "@/components/dashboards/DonorDashboard";
 
-// لوحة المؤشرات (Dashboard) — تعرض إحصائيات المنصة من RE_V_DASHBOARD
-const KPIS: { key: keyof DashboardKpis; label: string; suffix?: string }[] = [
-  { key: "total_beneficiaries", label: "إجمالي المستفيدين" },
-  { key: "approved_beneficiaries", label: "مستفيدون معتمدون" },
-  { key: "open_jobs", label: "وظائف منشورة" },
-  { key: "open_programs", label: "برامج تدريبية" },
-  { key: "companies", label: "الشركات" },
-  { key: "institutes", label: "المعاهد" },
-  { key: "total_hired", label: "تم توظيفهم" },
-  { key: "total_trainees", label: "متدربون" },
-  { key: "hire_rate_pct", label: "نسبة التوظيف", suffix: "%" },
-  { key: "job_donation_units", label: "تبرعات وظيفية (وحدة)" },
-  { key: "training_donation_units", label: "تبرعات تدريبية (مقعد)" },
-  { key: "total_donation_value", label: "قيمة التبرعات", suffix: " ر.س" },
-];
-
+// موجّه لوحة التحكم: يعرض اللوحة المناسبة لدور المستخدم فقط (خصوصية البيانات)
 export default function DashboardPage() {
-  const { data, isLoading } = useQuery({ queryKey: ["kpis"], queryFn: DashboardApi.kpis });
+  const { sessionStatus, userId, primaryRole, me, loading } = useMe();
 
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-brand-dark">لوحة المؤشرات</h1>
-      {isLoading && <p className="text-muted-foreground">جارٍ التحميل…</p>}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {KPIS.map((k) => (
-          <div key={k.key} className="card-brand">
-            <p className="text-sm text-muted-foreground">{k.label}</p>
-            <p className="mt-2 text-3xl font-bold text-brand">
-              {data ? `${data[k.key] ?? 0}${k.suffix ?? ""}` : "—"}
-            </p>
-          </div>
-        ))}
+  if (sessionStatus === "loading" || loading)
+    return <p className="text-center text-muted-foreground">جارٍ التحميل…</p>;
+
+  if (sessionStatus === "unauthenticated")
+    return (
+      <div className="mx-auto max-w-md card-brand text-center">
+        <p className="text-lg font-semibold text-brand-dark">يلزم تسجيل الدخول</p>
+        <p className="mt-2 text-sm text-muted-foreground">سجّل الدخول للوصول إلى لوحتك.</p>
+        <Link href="/login" className="btn-primary mt-4 inline-block">دخول</Link>
       </div>
-    </div>
-  );
+    );
+
+  switch (primaryRole) {
+    case "ADMIN":
+    case "STAFF":
+      return <AdminDashboard actor={userId} />;
+    case "COMPANY":
+      return <CompanyDashboard orgId={me?.org_id} actor={userId} />;
+    case "INSTITUTE":
+      return <InstituteDashboard orgId={me?.org_id} />;
+    case "DONOR":
+      return <DonorDashboard orgId={me?.org_id} />;
+    default:
+      return <BeneficiaryDashboard userId={userId} benefId={me?.benef_id} name={me?.full_name} />;
+  }
 }

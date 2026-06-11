@@ -66,8 +66,46 @@ export const ApplicationsApi = {
     api.post<{ application_id: number }>("/applications/job", { benef_id, job_id, cover_note }).then((r) => r.data),
 };
 
+// بعض نقاط ORDS تُغلّف النتيجة المفردة داخل items[] — نفكّها بأمان.
+function one<T>(d: any): T {
+  return (d && Array.isArray(d.items) ? d.items[0] : d) as T;
+}
+function feed<T>(d: any): T[] {
+  return (d && Array.isArray(d.items) ? d.items : Array.isArray(d) ? d : []) as T[];
+}
+
 export const DashboardApi = {
-  kpis: () => api.get<DashboardKpis>("/dashboard/kpis").then((r) => r.data),
+  kpis: () => api.get("/dashboard/kpis").then((r) => one<DashboardKpis>(r.data)),
+};
+
+// المستخدم الحالي وبياناته المخصّصة
+export const MeApi = {
+  get: (uid: number) => api.get(`/me`, { params: { uid } }).then((r) => one<any>(r.data)),
+  applications: (uid: number) => api.get(`/me/applications`, { params: { uid } }).then((r) => feed<any>(r.data)),
+  donations: (orgId: number) => api.get(`/me/donations`, { params: { org_id: orgId } }).then((r) => feed<any>(r.data)),
+};
+
+// المنظمة (شركة/معهد)
+export const OrgApi = {
+  jobs: (orgId: number) => api.get(`/org/jobs`, { params: { org_id: orgId } }).then((r) => feed<any>(r.data)),
+  programs: (orgId: number) => api.get(`/org/programs`, { params: { org_id: orgId } }).then((r) => feed<any>(r.data)),
+  applicants: (jobId: number) => api.get(`/jobs/${jobId}/applicants`).then((r) => feed<any>(r.data)),
+  enrollees: (programId: number) => api.get(`/programs/${programId}/enrollees`).then((r) => feed<any>(r.data)),
+};
+
+// إدارة حالة الطلبات (شركة/موظف/أدمن)
+export const AppApi = {
+  setStatus: (application_id: number, new_status: string, actor: number, note?: string) =>
+    api.post(`/applications/status`, { application_id, new_status, actor, note }).then((r) => r.data),
+};
+
+// لوحة الأدمن
+export const AdminApi = {
+  users: (actor: number) => api.get(`/admin/users`, { params: { actor } }).then((r) => feed<any>(r.data)),
+  setUserStatus: (user_id: number, status: string, actor: number) =>
+    api.post(`/admin/users/status`, { user_id, status, actor }).then((r) => r.data),
+  applications: (actor: number) => api.get(`/admin/applications`, { params: { actor } }).then((r) => feed<any>(r.data)),
+  donations: (actor: number) => api.get(`/admin/donations`, { params: { actor } }).then((r) => feed<any>(r.data)),
 };
 
 export const AuthApi = {
