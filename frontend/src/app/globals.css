@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* الهوية البصرية مستمدّة من شعار الجمعية: أخضر زمرّدي + ذهبي القمح */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 146 35% 12%;
+  --primary: 146 64% 33%;          /* #1f8a4c */
+  --primary-foreground: 0 0% 100%;
+  --muted: 146 30% 96%;
+  --muted-foreground: 146 12% 40%;
+  --border: 146 20% 88%;
+  --gold: 43 72% 49%;              /* #d7a724 */
+}
+.dark {
+  --background: 146 30% 8%;
+  --foreground: 0 0% 96%;
+  --primary: 142 55% 48%;
+  --primary-foreground: 146 30% 8%;
+  --muted: 146 22% 15%;
+  --muted-foreground: 146 10% 65%;
+  --border: 146 16% 22%;
+}
+
+* { border-color: hsl(var(--border)); }
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  direction: rtl;
+}
+
+/* تدرّج هوية الجمعية (أخضر المنارة ← أخضر القمح) */
+.brand-gradient { background-image: linear-gradient(135deg, #136138 0%, #1f8a4c 55%, #5cb335 100%); }
+
+.card { @apply rounded-xl border bg-white p-5 shadow-sm transition dark:bg-muted; }
+.btn-primary { @apply rounded-lg bg-brand px-4 py-2 font-medium text-white shadow-sm transition hover:bg-brand-dark; }
+.btn-gold { @apply rounded-lg bg-gold px-4 py-2 font-semibold text-brand-dark shadow-sm transition hover:bg-gold-dark hover:text-white; }
+.badge { @apply inline-flex items-center rounded-full bg-brand-light px-2.5 py-0.5 text-xs font-medium text-brand-dark; }
+.badge-gold { @apply inline-flex items-center rounded-full bg-gold-light px-2.5 py-0.5 text-xs font-medium text-gold-dark; }
+/* خط ذهبي علوي يميّز البطاقات على هوية الجمعية */
+.card-brand { @apply card border-t-4 border-t-gold; }

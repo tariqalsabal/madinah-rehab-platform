@@ -1,0 +1,19 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+*.log
+
+# بيئة
+.env
+.env.local
+.env*.local
+
+# نظام
+.DS_Store
+Thumbs.db
+
+# Oracle
+*.dmp
+spool/
