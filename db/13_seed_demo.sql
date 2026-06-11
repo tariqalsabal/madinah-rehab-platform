@@ -105,7 +105,7 @@ BEGIN
     v_title := 'برنامج '||majors(1+MOD(i,majors.COUNT));
     v_cityx := cities(1+MOD(i,cities.COUNT));
     v_field := fieldcat(fieldcodes(1+MOD(i,fieldcodes.COUNT)));
-    INSERT INTO RE_TRAINING_PROGRAMS(org_id,title,city,seats_total,original_fee,discount_pct,is_free,status,published_at,field_cat,start_date,duration_hours,level)
+    INSERT INTO RE_TRAINING_PROGRAMS(org_id,title,city,seats_total,original_fee,discount_pct,is_free,status,published_at,field_cat,start_date,duration_hours,"LEVEL")
     VALUES(v_orgx, v_title, v_cityx, 20+MOD(i,30), 1500, CASE WHEN MOD(i,2)=0 THEN 100 ELSE 50 END,
            CASE WHEN MOD(i,2)=0 THEN 'Y' ELSE 'N' END, 'PUBLISHED', SYSTIMESTAMP, v_field, SYSDATE+7+i, 40+MOD(i,60), 'BEGINNER')
     RETURNING program_id INTO v_prog;
