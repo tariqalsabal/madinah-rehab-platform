@@ -18,6 +18,7 @@ BEGIN
     job_type        => 'PLSQL_BLOCK',
     job_action      => q'[BEGIN
         apex_session.create_session(p_app_id => 101, p_page_id => 1, p_username => 'ADMIN');
+        apex_util.set_security_group_id(9421272729640104);  -- يصحّ بعد إنشاء الجلسة؛ يجبر مجموعة الرسائل
         apex_mail.push_queue;
         COMMIT;
       END;]',
