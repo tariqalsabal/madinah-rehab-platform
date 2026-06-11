@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { ProgramsApi, ApplicationsApi } from "@/lib/api";
 import { useMe } from "@/lib/useMe";
+import { notifyEvent } from "@/lib/notify";
 
 // تفاصيل البرنامج التدريبي + تسجيل المستفيد فيه
 export default function ProgramDetailPage() {
@@ -25,7 +26,13 @@ export default function ProgramDetailPage() {
     if (sessionStatus !== "authenticated") { router.push(`/login?callbackUrl=/programs/${id}`); return; }
     if (primaryRole !== "BENEFICIARY" || !me?.benef_id) { setState("error"); setMsg("التسجيل متاح لحسابات المستفيدين فقط."); return; }
     setState("loading");
-    try { await ApplicationsApi.applyProgram(me.benef_id, id); setState("done"); }
+    try {
+      await ApplicationsApi.applyProgram(me.benef_id, id);
+      notifyEvent("تسجيل جديد في برنامج", `${me.full_name} → ${(p as any).title}`, [
+        ["المتدرّب", me.full_name], ["البرنامج", (p as any).title], ["المعهد", (p as any).org_name],
+      ]);
+      setState("done");
+    }
     catch (e: any) {
       if (String(e.message).includes("سبق") || String(e.message).includes("409")) setState("dup");
       else { setState("error"); setMsg(e.message || "تعذّر التسجيل"); }

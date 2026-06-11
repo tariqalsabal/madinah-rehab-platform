@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { JobsApi, ApplicationsApi } from "@/lib/api";
 import { useMe } from "@/lib/useMe";
+import { notifyEvent } from "@/lib/notify";
 
 // صفحة تفاصيل الوظيفة + تقديم فعلي (يحلّ benef_id من الجلسة)
 export default function JobDetailPage() {
@@ -34,6 +35,9 @@ export default function JobDetailPage() {
     setApplyState("loading");
     try {
       await ApplicationsApi.applyJob(me.benef_id, id);
+      notifyEvent("تقديم جديد على وظيفة", `${me.full_name} → ${(job as any).title}`, [
+        ["المتقدّم", me.full_name], ["الوظيفة", (job as any).title], ["الجهة", (job as any).org_name],
+      ]);
       setApplyState("done");
     } catch (e: any) {
       if (String(e.message).includes("سبق") || String(e.message).includes("409")) {

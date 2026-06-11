@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { OrgApi, MeApi, DonationApi } from "@/lib/api";
 import { Badge, Card, Table, Empty, Modal, Input, SelectField, FIELD_OPTIONS } from "./shared";
+import { notifyEvent } from "@/lib/notify";
+
+const DON_AR: Record<string, string> = { JOB: "وظيفي", TRAINING: "تدريبي", RECRUITMENT: "توظيفي" };
 
 export default function InstituteDashboard({ orgId, actor }: { orgId?: number; actor: number }) {
   const qc = useQueryClient();
@@ -108,7 +111,17 @@ export function DonationForm({ orgId, actor, type, onClose, onDone }: any) {
   const [f, setF] = useState<any>({ title: "", donation_type: type || "JOB", target_role: "", units_pledged: 10, discount_pct: "", monetary_value: "" });
   const [err, setErr] = useState("");
   const set = (k: string, v: any) => setF((s: any) => ({ ...s, [k]: v }));
-  const m = useMutation({ mutationFn: () => DonationApi.create({ ...f, donor_org_id: orgId, actor }), onSuccess: onDone, onError: (e: any) => setErr(e.message) });
+  const m = useMutation({
+    mutationFn: () => DonationApi.create({ ...f, donor_org_id: orgId, actor }),
+    onSuccess: () => {
+      notifyEvent("تبرّع جديد", f.title, [
+        ["العنوان", f.title], ["النوع", DON_AR[f.donation_type]], ["عدد الوحدات", f.units_pledged],
+        ["الدور المستهدف", f.target_role], ["القيمة التقديرية", f.monetary_value],
+      ]);
+      onDone();
+    },
+    onError: (e: any) => setErr(e.message),
+  });
   return (
     <Modal title="تسجيل تبرّع جديد" onClose={onClose}>
       <form onSubmit={(e) => { e.preventDefault(); setErr(""); m.mutate(); }} className="space-y-3">

@@ -6,10 +6,11 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useMe } from "@/lib/useMe";
 import { MessagesApi, PublicApi } from "@/lib/api";
 import { Empty } from "@/components/dashboards/shared";
+import { notifyEvent } from "@/lib/notify";
 
 function Messages() {
   const sp = useSearchParams();
-  const { sessionStatus, userId } = useMe();
+  const { sessionStatus, userId, me } = useMe();
   const qc = useQueryClient();
   const [peer, setPeer] = useState<number | null>(sp.get("peer") ? Number(sp.get("peer")) : null);
   const [text, setText] = useState("");
@@ -20,7 +21,11 @@ function Messages() {
   const thread = useQuery({ queryKey: ["thread", userId, peer], queryFn: () => MessagesApi.thread(userId, peer!), enabled: !!userId && !!peer, refetchInterval: 8000 });
   const send = useMutation({
     mutationFn: () => MessagesApi.send(userId, peer!, text),
-    onSuccess: () => { setText(""); thread.refetch(); qc.invalidateQueries({ queryKey: ["convos", userId] }); },
+    onSuccess: (_d, _v, _c) => {
+      const peerName = convos.data?.find((c: any) => c.peer_id === peer)?.peer_name;
+      notifyEvent("رسالة جديدة", "رسالة عبر المنصة", [["من", me?.full_name], ["إلى", peerName || `#${peer}`], ["النص", text.slice(0, 200)]]);
+      setText(""); thread.refetch(); qc.invalidateQueries({ queryKey: ["convos", userId] });
+    },
   });
 
   useEffect(() => { endRef.current?.scrollIntoView(); }, [thread.data]);

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { OrgApi, MeApi, AppApi } from "@/lib/api";
 import { Badge, Card, Table, Empty, Modal, Input, SelectField, FIELD_OPTIONS, EDU_OPTIONS } from "./shared";
+import { notifyEvent } from "@/lib/notify";
 
 const ACTIONS = [
   { status: "SHORTLISTED", label: "قائمة مختصرة", cls: "text-gold-dark" },
@@ -21,8 +22,12 @@ export default function CompanyDashboard({ orgId, actor }: { orgId?: number; act
   const applicants = useQuery({ queryKey: ["applicants", openJob], queryFn: () => OrgApi.applicants(openJob!), enabled: !!openJob });
 
   const act = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => AppApi.setStatus(id, status, actor),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["applicants", openJob] }); qc.invalidateQueries({ queryKey: ["org-jobs", orgId] }); },
+    mutationFn: (v: { id: number; status: string; name?: string }) => AppApi.setStatus(v.id, v.status, actor),
+    onSuccess: (_d, v) => {
+      if (v.status === "HIRED") notifyEvent("توظيف مستفيد", `تم توظيف ${v.name}`, [["المستفيد", v.name], ["الحالة", "تم التوظيف"]]);
+      qc.invalidateQueries({ queryKey: ["applicants", openJob] });
+      qc.invalidateQueries({ queryKey: ["org-jobs", orgId] });
+    },
   });
 
   if (!orgId) return <Empty text="لا توجد منظمة مرتبطة بحسابك. تواصل مع إدارة الجمعية." />;
@@ -68,7 +73,7 @@ export default function CompanyDashboard({ orgId, actor }: { orgId?: number; act
                     <div className="flex flex-wrap gap-2">
                       {ACTIONS.map((ac) => (
                         <button key={ac.status} disabled={act.isPending}
-                          onClick={() => act.mutate({ id: a.application_id, status: ac.status })}
+                          onClick={() => act.mutate({ id: a.application_id, status: ac.status, name: a.beneficiary_name })}
                           className={`text-xs ${ac.cls} disabled:opacity-50`}>{ac.label}</button>
                       ))}
                       <a href={`/messages?peer=${a.benef_user_id}`} className="text-xs text-brand-dark">مراسلة</a>

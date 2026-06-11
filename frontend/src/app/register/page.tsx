@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, Mail, Phone, Lock, CheckCircle2 } from "lucide-react";
 import { AuthApi } from "@/lib/api";
+import { notifyEvent } from "@/lib/notify";
 
 const USER_TYPES = [
   { key: "BENEFICIARY", label: "مستفيد" },
@@ -40,6 +41,10 @@ function RegisterForm() {
     setLoading(true); setErr("");
     try {
       await AuthApi.register(form);
+      const typeAr = USER_TYPES.find((t) => t.key === form.user_type)?.label || form.user_type;
+      notifyEvent("تسجيل جديد", `${typeAr}: ${form.full_name}`, [
+        ["نوع الحساب", typeAr], ["الاسم", form.full_name], ["البريد", form.email], ["الجوال", form.phone],
+      ]);
       setOk(true);
       setTimeout(() => router.push("/login"), 1600);
     } catch (e: any) {
