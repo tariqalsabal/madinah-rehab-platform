@@ -12,9 +12,9 @@ export default function ContactPage() {
   const support = useQuery({ queryKey: ["support"], queryFn: () => PublicApi.support() });
 
   const info = [
-    { t: "البريد", v: "info@madinah-rehab.sa" },
-    { t: "الهاتف", v: "+966 14 000 0000" },
-    { t: "العنوان", v: "المدينة المنورة — المملكة العربية السعودية" },
+    { t: "البريد الإلكتروني", v: "info@mcw.sa" },
+    { t: "المقر", v: "منطقة المدينة المنورة — المملكة العربية السعودية" },
+    { t: "الفروع", v: "14 فرعاً تغطي المنطقة" },
     { t: "أوقات العمل", v: "الأحد – الخميس، 8 ص – 4 م" },
   ];
 

@@ -50,6 +50,30 @@ export default function HomePage() {
       {/* إحصائيات حيّة */}
       <StatsBand />
 
+      {/* عن الجمعية */}
+      <section className="rounded-3xl border bg-white p-8 md:p-10">
+        <div className="grid items-center gap-8 md:grid-cols-2">
+          <div>
+            <span className="badge-gold">جمعية مسجّلة برقم 626</span>
+            <h2 className="mt-3 text-2xl font-bold text-brand-dark">منصةٌ من قلب عملٍ خيريٍّ عريق</h2>
+            <p className="mt-3 leading-8 text-muted-foreground">
+              تُشغّل المنصة <b>جمعية مستودع المدينة المنورة الخيري</b>، الجمعية الخيرية غير الربحية التي
+              أُنشئت عام 1415هـ وترعى الأسر المستفيدة وتغطي منطقة المدينة المنورة كاملة عبر 14 فرعاً —
+              لتمتدّ خبرتها في خدمة الناس إلى تمكينهم مهنياً عبر التأهيل والتوظيف.
+            </p>
+            <Link href="/about" className="btn-primary mt-5 inline-block">تعرّف على الجمعية</Link>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[["14", "فرعاً"], ["+10,000", "أسرة"], ["30", "عاماً"]].map(([n, l]) => (
+              <div key={l} className="rounded-2xl bg-brand-light p-4 text-center">
+                <p className="text-2xl font-bold text-brand">{n}</p>
+                <p className="text-xs text-brand-dark">{l}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* كيف تعمل المنصة */}
       <section>
         <div className="mb-8 text-center">
