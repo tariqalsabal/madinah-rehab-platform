@@ -58,17 +58,20 @@ export default function CompanyDashboard({ orgId, actor }: { orgId?: number; act
             <Table head={["المرشّح", "البريد", "التوافق", "الحالة", "الإجراء"]}>
               {applicants.data.map((a: any) => (
                 <tr key={a.application_id} className="border-b">
-                  <td className="px-2 py-2">{a.beneficiary_name}</td>
-                  <td className="px-2 py-2 text-muted-foreground" dir="ltr">{a.beneficiary_email}</td>
+                  <td className="px-2 py-2">
+                    <a href={`/beneficiaries/${a.benef_id}`} className="font-medium text-brand hover:underline">{a.beneficiary_name}</a>
+                  </td>
+                  <td className="px-2 py-2 text-muted-foreground" dir="ltr">{a.beneficiary_email || "—"}</td>
                   <td className="px-2 py-2">{a.match_score ?? "—"}%</td>
                   <td className="px-2 py-2"><Badge status={a.status} /></td>
                   <td className="px-2 py-2">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {ACTIONS.map((ac) => (
                         <button key={ac.status} disabled={act.isPending}
                           onClick={() => act.mutate({ id: a.application_id, status: ac.status })}
                           className={`text-xs ${ac.cls} disabled:opacity-50`}>{ac.label}</button>
                       ))}
+                      <a href={`/messages?peer=${a.benef_user_id}`} className="text-xs text-brand-dark">مراسلة</a>
                     </div>
                   </td>
                 </tr>

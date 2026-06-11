@@ -44,13 +44,14 @@ export default function InstituteDashboard({ orgId, actor }: { orgId?: number; a
       {openProg && (
         <Card title="المسجّلون في البرنامج">
           {enrollees.isLoading ? <Empty text="جارٍ التحميل…" /> : !enrollees.data?.length ? <Empty text="لا يوجد مسجّلون بعد." /> : (
-            <Table head={["المتدرّب", "البريد", "الحالة", "التاريخ"]}>
+            <Table head={["المتدرّب", "البريد", "الحالة", "التاريخ", ""]}>
               {enrollees.data.map((e: any) => (
                 <tr key={e.application_id} className="border-b">
-                  <td className="px-2 py-2">{e.beneficiary_name}</td>
+                  <td className="px-2 py-2"><a href={`/beneficiaries/${e.benef_id}`} className="text-brand hover:underline">{e.beneficiary_name}</a></td>
                   <td className="px-2 py-2 text-muted-foreground" dir="ltr">{e.beneficiary_email}</td>
                   <td className="px-2 py-2"><Badge status={e.status} /></td>
                   <td className="px-2 py-2 text-xs text-muted-foreground">{String(e.created_at).slice(0, 10)}</td>
+                  <td className="px-2 py-2"><a href={`/messages?peer=${e.benef_user_id}`} className="text-xs text-brand-dark">مراسلة</a></td>
                 </tr>
               ))}
             </Table>

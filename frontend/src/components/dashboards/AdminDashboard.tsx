@@ -98,7 +98,7 @@ export default function AdminDashboard({ actor }: { actor: number }) {
             <Table head={["الاسم", "المدينة", "المؤهل", "الطلبات", "الاكتمال", "الحالة", "اعتماد"]}>
               {filtered.map((b: any) => (
                 <tr key={b.benef_id} className="border-b">
-                  <td className="px-2 py-2">{b.full_name}</td>
+                  <td className="px-2 py-2"><a href={`/beneficiaries/${b.benef_id}`} className="text-brand hover:underline">{b.full_name}</a></td>
                   <td className="px-2 py-2">{b.city}</td>
                   <td className="px-2 py-2">{b.education_level}</td>
                   <td className="px-2 py-2">{b.applications_count}</td>

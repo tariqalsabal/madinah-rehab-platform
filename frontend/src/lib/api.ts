@@ -109,6 +109,30 @@ export const AppApi = {
     api.post(`/applications/status`, { application_id, new_status, actor, note }).then((r) => r.data),
 };
 
+// البروفايل والمرفقات
+export const ProfileApi = {
+  update: (uid: number, payload: any) => api.post(`/me/profile`, { uid, ...payload }).then((r) => r.data),
+  getFull: (benefId: number, viewer: number) =>
+    api.get(`/beneficiaries/${benefId}/profile`, { params: { viewer } }).then((r) => one<any>(r.data)),
+  documents: (uid: number) => api.get(`/me/documents`, { params: { uid } }).then((r) => feed<any>(r.data)),
+  addDocument: (uid: number, doc_type: string, title: string, url: string) =>
+    api.post(`/documents`, { uid, doc_type, title, url }).then((r) => r.data),
+};
+
+// المراسلات الداخلية
+export const MessagesApi = {
+  conversations: (uid: number) => api.get(`/me/conversations`, { params: { uid } }).then((r) => feed<any>(r.data)),
+  thread: (uid: number, peer: number) => api.get(`/messages`, { params: { uid, peer } }).then((r) => (Array.isArray(r.data) ? r.data : [])),
+  send: (from_uid: number, to_uid: number, body: string, application_id?: number) =>
+    api.post(`/messages`, { from_uid, to_uid, body, application_id }).then((r) => r.data),
+};
+
+// الإشعارات
+export const NotificationsApi = {
+  list: (uid: number) => api.get(`/me/notifications`, { params: { uid } }).then((r) => feed<any>(r.data)),
+  read: (uid: number, notif_id?: number) => api.post(`/notifications/read`, { uid, notif_id: notif_id ?? null }).then((r) => r.data),
+};
+
 // لوحة الأدمن
 export const AdminApi = {
   users: (actor: number) => api.get(`/admin/users`, { params: { actor } }).then((r) => feed<any>(r.data)),
