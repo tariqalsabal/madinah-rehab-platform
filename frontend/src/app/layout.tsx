@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={cairo.variable}>
-      <body className="min-h-screen font-sans antialiased">
+      <body className="flex min-h-screen flex-col font-sans antialiased">
         <Providers>
           <Header />
-          <main className="container py-8">{children}</main>
-          <footer className="mt-12 border-t-4 border-t-gold bg-brand-dark py-8 text-center text-sm text-white/90">
+          <main className="container w-full flex-1 py-8">{children}</main>
+          <footer className="mt-auto border-t-4 border-t-gold bg-brand-dark py-8 text-center text-sm text-white/90">
             <p className="font-semibold">جمعية مستودع المدينة المنورة الخيري</p>
             <p className="mt-1 text-white/70">
               © {new Date().getFullYear()} منصة التأهيل والتوظيف — جميع الحقوق محفوظة

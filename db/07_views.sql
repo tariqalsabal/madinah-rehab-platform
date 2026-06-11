@@ -28,7 +28,7 @@ SELECT j.job_id, j.title, j.status, j.city, j.region, j.work_mode, j.employment_
 
 -- البرامج التدريبية مع المقاعد المتاحة
 CREATE OR REPLACE VIEW RE_V_TRAINING AS
-SELECT p.program_id, p.title, p.status, p.city, p.delivery_mode, p.level, p.duration_hours,
+SELECT p.program_id, p.title, p.status, p.city, p.delivery_mode, p.prog_level, p.duration_hours,
        p.seats_total, p.seats_taken, (p.seats_total - p.seats_taken) AS seats_available,
        p.original_fee, p.discount_pct, p.is_free, p.certificate,
        p.org_id, o.legal_name AS org_name, o.brand_name AS org_brand,

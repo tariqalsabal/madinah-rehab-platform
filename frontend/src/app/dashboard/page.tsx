@@ -31,9 +31,9 @@ export default function DashboardPage() {
     case "COMPANY":
       return <CompanyDashboard orgId={me?.org_id} actor={userId} />;
     case "INSTITUTE":
-      return <InstituteDashboard orgId={me?.org_id} />;
+      return <InstituteDashboard orgId={me?.org_id} actor={userId} />;
     case "DONOR":
-      return <DonorDashboard orgId={me?.org_id} />;
+      return <DonorDashboard orgId={me?.org_id} actor={userId} />;
     default:
       return <BeneficiaryDashboard userId={userId} benefId={me?.benef_id} name={me?.full_name} />;
   }

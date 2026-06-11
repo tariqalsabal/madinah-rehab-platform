@@ -91,6 +91,13 @@ export const OrgApi = {
   programs: (orgId: number) => api.get(`/org/programs`, { params: { org_id: orgId } }).then((r) => feed<any>(r.data)),
   applicants: (jobId: number) => api.get(`/jobs/${jobId}/applicants`).then((r) => feed<any>(r.data)),
   enrollees: (programId: number) => api.get(`/programs/${programId}/enrollees`).then((r) => feed<any>(r.data)),
+  createJob: (payload: any) => api.post(`/org/jobs`, payload).then((r) => r.data),
+  createProgram: (payload: any) => api.post(`/org/programs`, payload).then((r) => r.data),
+};
+
+// التبرعات (إنشاء)
+export const DonationApi = {
+  create: (payload: any) => api.post(`/donations`, payload).then((r) => r.data),
 };
 
 // إدارة حالة الطلبات (شركة/موظف/أدمن)
@@ -106,6 +113,9 @@ export const AdminApi = {
     api.post(`/admin/users/status`, { user_id, status, actor }).then((r) => r.data),
   applications: (actor: number) => api.get(`/admin/applications`, { params: { actor } }).then((r) => feed<any>(r.data)),
   donations: (actor: number) => api.get(`/admin/donations`, { params: { actor } }).then((r) => feed<any>(r.data)),
+  beneficiaries: (actor: number) => api.get(`/admin/beneficiaries`, { params: { actor } }).then((r) => feed<any>(r.data)),
+  approveBeneficiary: (benef_id: number, status: string, actor: number) =>
+    api.post(`/beneficiaries/approve`, { benef_id, status, actor }).then((r) => r.data),
 };
 
 export const AuthApi = {

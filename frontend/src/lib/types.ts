@@ -33,7 +33,7 @@ export interface TrainingProgram {
   org_name: string;
   city?: string;
   delivery_mode: "ONSITE" | "ONLINE" | "HYBRID";
-  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+  prog_level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   seats_available: number;
   is_free: "Y" | "N";
   discount_pct: number;

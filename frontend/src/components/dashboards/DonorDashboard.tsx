@@ -1,11 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MeApi } from "@/lib/api";
 import { Badge, Card, Table, Empty } from "./shared";
+import { DonationForm } from "./InstituteDashboard";
 
 // لوحة الجهة المانحة: تبرعاتها وأثرها
-export default function DonorDashboard({ orgId }: { orgId?: number }) {
+export default function DonorDashboard({ orgId, actor }: { orgId?: number; actor: number }) {
+  const qc = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
   const donations = useQuery({ queryKey: ["org-dons", orgId], queryFn: () => MeApi.donations(orgId!), enabled: !!orgId });
   if (!orgId) return <Empty text="لا توجد جهة مانحة مرتبطة بحسابك. تواصل مع إدارة الجمعية." />;
 
@@ -21,7 +25,7 @@ export default function DonorDashboard({ orgId }: { orgId?: number }) {
         <div className="card-brand"><p className="text-xs text-muted-foreground">عدد التبرعات</p><p className="mt-1 text-2xl font-bold text-brand">{donations.data?.length || 0}</p></div>
       </div>
 
-      <Card title="تبرعاتي">
+      <Card title="تبرعاتي" action={<button onClick={() => setShowForm(true)} className="btn-gold text-sm">+ تسجيل تبرّع</button>}>
         {donations.isLoading ? <Empty text="جارٍ التحميل…" /> : !donations.data?.length ? <Empty text="لا توجد تبرعات بعد." /> : (
           <Table head={["العنوان", "النوع", "الوحدات", "المستهلك", "الأثر", "الحالة"]}>
             {donations.data.map((d: any) => (
@@ -37,6 +41,11 @@ export default function DonorDashboard({ orgId }: { orgId?: number }) {
           </Table>
         )}
       </Card>
+
+      {showForm && (
+        <DonationForm orgId={orgId} actor={actor} onClose={() => setShowForm(false)}
+          onDone={() => { setShowForm(false); qc.invalidateQueries({ queryKey: ["org-dons", orgId] }); }} />
+      )}
     </div>
   );
 }

@@ -77,7 +77,12 @@ export default function JobDetailPage() {
         </dl>
 
         <div className="mt-6">
-          {applyState === "done" ? (
+          {/* التقديم متاح للمستفيدين فقط؛ يُخفى عن باقي الأدوار */}
+          {sessionStatus === "authenticated" && primaryRole !== "BENEFICIARY" ? (
+            <p className="rounded-lg bg-muted px-4 py-3 text-center text-sm text-muted-foreground">
+              التقديم متاح لحسابات المستفيدين فقط.
+            </p>
+          ) : applyState === "done" ? (
             <p className="rounded-lg bg-brand-light px-4 py-3 text-center text-brand-dark">✅ تم تقديم طلبك بنجاح! تابعه من لوحتك.</p>
           ) : applyState === "dup" ? (
             <p className="rounded-lg bg-gold-light px-4 py-3 text-center text-gold-dark">سبق أن قدّمت على هذه الوظيفة.</p>

@@ -63,7 +63,7 @@ CREATE TABLE RE_TRAINING_PROGRAMS (
   outcomes       CLOB,                     -- مخرجات التدريب
   city           VARCHAR2(80),
   delivery_mode  VARCHAR2(15) DEFAULT 'ONSITE', -- ONSITE/ONLINE/HYBRID
-  level          VARCHAR2(20) DEFAULT 'BEGINNER', -- BEGINNER/INTERMEDIATE/ADVANCED
+  prog_level     VARCHAR2(20) DEFAULT 'BEGINNER', -- BEGINNER/INTERMEDIATE/ADVANCED (level كلمة محجوزة)
   duration_hours NUMBER,
   seats_total    NUMBER DEFAULT 0 NOT NULL,
   seats_taken    NUMBER DEFAULT 0 NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE RE_TRAINING_PROGRAMS (
   created_at     TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
   updated_at     TIMESTAMP,
   CONSTRAINT re_tp_mode_ck   CHECK (delivery_mode IN ('ONSITE','ONLINE','HYBRID')),
-  CONSTRAINT re_tp_lvl_ck    CHECK (level IN ('BEGINNER','INTERMEDIATE','ADVANCED')),
+  CONSTRAINT re_tp_lvl_ck    CHECK (prog_level IN ('BEGINNER','INTERMEDIATE','ADVANCED')),
   CONSTRAINT re_tp_disc_ck   CHECK (discount_pct BETWEEN 0 AND 100),
   CONSTRAINT re_tp_seats_ck  CHECK (seats_taken <= seats_total),
   CONSTRAINT re_tp_status_ck CHECK (status IN ('DRAFT','PENDING','APPROVED','PUBLISHED','CLOSED','COMPLETED','REJECTED'))

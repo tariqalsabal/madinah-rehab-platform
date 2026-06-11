@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { DashboardApi, AdminApi } from "@/lib/api";
 import type { DashboardKpis } from "@/lib/types";
-import { Badge, Card, Table, Empty } from "./shared";
+import { Badge, Card, Table, Empty, exportCsv } from "./shared";
 
 const KPIS: { key: keyof DashboardKpis; label: string; suffix?: string }[] = [
   { key: "total_beneficiaries", label: "المستفيدون" },
@@ -17,19 +17,36 @@ const KPIS: { key: keyof DashboardKpis; label: string; suffix?: string }[] = [
   { key: "total_donation_value", label: "قيمة التبرعات", suffix: " ر.س" },
 ];
 
-// لوحة الأدمن: مؤشرات + إدارة الحسابات + الطلبات + التبرعات
+const TABS = [["users", "الحسابات"], ["benef", "المستفيدون"], ["apps", "الطلبات"], ["donations", "التبرعات"]] as const;
+
+function filterRows(rows: any[] | undefined, q: string) {
+  if (!rows) return [];
+  if (!q.trim()) return rows;
+  const s = q.trim().toLowerCase();
+  return rows.filter((r) => Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(s)));
+}
+
 export default function AdminDashboard({ actor }: { actor: number }) {
-  const [tab, setTab] = useState<"users" | "apps" | "donations">("users");
+  const [tab, setTab] = useState<typeof TABS[number][0]>("users");
+  const [q, setQ] = useState("");
   const qc = useQueryClient();
   const { data: kpis } = useQuery({ queryKey: ["kpis"], queryFn: DashboardApi.kpis });
   const users = useQuery({ queryKey: ["admin-users", actor], queryFn: () => AdminApi.users(actor), enabled: tab === "users" });
+  const benef = useQuery({ queryKey: ["admin-benef", actor], queryFn: () => AdminApi.beneficiaries(actor), enabled: tab === "benef" });
   const apps = useQuery({ queryKey: ["admin-apps", actor], queryFn: () => AdminApi.applications(actor), enabled: tab === "apps" });
   const dons = useQuery({ queryKey: ["admin-dons", actor], queryFn: () => AdminApi.donations(actor), enabled: tab === "donations" });
 
-  const setStatus = useMutation({
+  const setUserStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => AdminApi.setUserStatus(id, status, actor),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-users", actor] }),
   });
+  const approve = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => AdminApi.approveBeneficiary(id, status, actor),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-benef", actor] }),
+  });
+
+  const current = tab === "users" ? users.data : tab === "benef" ? benef.data : tab === "apps" ? apps.data : dons.data;
+  const filtered = useMemo(() => filterRows(current, q), [current, q]);
 
   return (
     <div className="space-y-6">
@@ -44,29 +61,53 @@ export default function AdminDashboard({ actor }: { actor: number }) {
         ))}
       </div>
 
-      <div className="flex gap-2">
-        {[["users", "الحسابات"], ["apps", "الطلبات"], ["donations", "التبرعات"]].map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k as any)}
+      <div className="flex flex-wrap items-center gap-2">
+        {TABS.map(([k, l]) => (
+          <button key={k} onClick={() => { setTab(k); setQ(""); }}
             className={`rounded-full px-4 py-1.5 text-sm ${tab === k ? "bg-brand text-white" : "bg-brand-light text-brand-dark"}`}>{l}</button>
         ))}
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="بحث…" className="ms-auto w-48 rounded-lg border px-3 py-1.5 text-sm" />
+        <button onClick={() => exportCsv(filtered, `${tab}.csv`)} className="rounded-lg border px-3 py-1.5 text-sm text-brand">تصدير CSV ⬇</button>
       </div>
 
       {tab === "users" && (
-        <Card title="إدارة الحسابات">
-          {users.isLoading ? <Empty text="جارٍ التحميل…" /> : !users.data?.length ? <Empty text="لا توجد حسابات" /> : (
+        <Card title={`الحسابات (${filtered.length})`}>
+          {users.isLoading ? <Empty text="جارٍ التحميل…" /> : !filtered.length ? <Empty text="لا نتائج" /> : (
             <Table head={["الاسم", "البريد", "النوع", "الحالة", "إجراء"]}>
-              {users.data.map((u: any) => (
+              {filtered.map((u: any) => (
                 <tr key={u.user_id} className="border-b">
                   <td className="px-2 py-2">{u.full_name}</td>
                   <td className="px-2 py-2 text-muted-foreground" dir="ltr">{u.email}</td>
                   <td className="px-2 py-2">{u.user_type}</td>
                   <td className="px-2 py-2"><Badge status={u.status} /></td>
                   <td className="px-2 py-2">
-                    {u.status === "SUSPENDED" ? (
-                      <button onClick={() => setStatus.mutate({ id: u.user_id, status: "ACTIVE" })} className="text-xs text-brand">تفعيل</button>
-                    ) : (
-                      <button onClick={() => setStatus.mutate({ id: u.user_id, status: "SUSPENDED" })} className="text-xs text-red-600">إيقاف</button>
-                    )}
+                    {u.status === "SUSPENDED"
+                      ? <button onClick={() => setUserStatus.mutate({ id: u.user_id, status: "ACTIVE" })} className="text-xs text-brand">تفعيل</button>
+                      : <button onClick={() => setUserStatus.mutate({ id: u.user_id, status: "SUSPENDED" })} className="text-xs text-red-600">إيقاف</button>}
+                  </td>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </Card>
+      )}
+
+      {tab === "benef" && (
+        <Card title={`المستفيدون (${filtered.length})`}>
+          {benef.isLoading ? <Empty text="جارٍ التحميل…" /> : !filtered.length ? <Empty text="لا نتائج" /> : (
+            <Table head={["الاسم", "المدينة", "المؤهل", "الطلبات", "الاكتمال", "الحالة", "اعتماد"]}>
+              {filtered.map((b: any) => (
+                <tr key={b.benef_id} className="border-b">
+                  <td className="px-2 py-2">{b.full_name}</td>
+                  <td className="px-2 py-2">{b.city}</td>
+                  <td className="px-2 py-2">{b.education_level}</td>
+                  <td className="px-2 py-2">{b.applications_count}</td>
+                  <td className="px-2 py-2">{b.completeness_pct}%</td>
+                  <td className="px-2 py-2"><Badge status={b.approval_status} /></td>
+                  <td className="px-2 py-2">
+                    {b.approval_status !== "APPROVED"
+                      ? <button onClick={() => approve.mutate({ id: b.benef_id, status: "APPROVED" })} className="text-xs text-brand">اعتماد</button>
+                      : <button onClick={() => approve.mutate({ id: b.benef_id, status: "REJECTED" })} className="text-xs text-red-600">إلغاء</button>}
                   </td>
                 </tr>
               ))}
@@ -76,10 +117,10 @@ export default function AdminDashboard({ actor }: { actor: number }) {
       )}
 
       {tab === "apps" && (
-        <Card title="كل الطلبات">
-          {apps.isLoading ? <Empty text="جارٍ التحميل…" /> : !apps.data?.length ? <Empty text="لا توجد طلبات" /> : (
+        <Card title={`الطلبات (${filtered.length})`}>
+          {apps.isLoading ? <Empty text="جارٍ التحميل…" /> : !filtered.length ? <Empty text="لا نتائج" /> : (
             <Table head={["المستفيد", "النوع", "الفرصة", "التوافق", "الحالة"]}>
-              {apps.data.map((a: any) => (
+              {filtered.map((a: any) => (
                 <tr key={a.application_id} className="border-b">
                   <td className="px-2 py-2">{a.beneficiary_name}</td>
                   <td className="px-2 py-2">{a.target_type === "JOB" ? "وظيفة" : "تدريب"}</td>
@@ -94,10 +135,10 @@ export default function AdminDashboard({ actor }: { actor: number }) {
       )}
 
       {tab === "donations" && (
-        <Card title="كل التبرعات">
-          {dons.isLoading ? <Empty text="جارٍ التحميل…" /> : !dons.data?.length ? <Empty text="لا توجد تبرعات" /> : (
+        <Card title={`التبرعات (${filtered.length})`}>
+          {dons.isLoading ? <Empty text="جارٍ التحميل…" /> : !filtered.length ? <Empty text="لا نتائج" /> : (
             <Table head={["العنوان", "النوع", "المانح", "الوحدات", "المستهلك", "الحالة"]}>
-              {dons.data.map((d: any) => (
+              {filtered.map((d: any) => (
                 <tr key={d.donation_id} className="border-b">
                   <td className="px-2 py-2">{d.title}</td>
                   <td className="px-2 py-2">{d.donation_type === "JOB" ? "وظيفي" : d.donation_type === "TRAINING" ? "تدريبي" : "توظيفي"}</td>

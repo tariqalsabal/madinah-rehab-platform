@@ -30,7 +30,7 @@ export default function ProgramsPage() {
             <p className="mt-1 text-sm text-muted-foreground">{p.org_name}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span>📍 {p.city || "—"}</span>
-              <span>🎓 {p.level}</span>
+              <span>🎓 {p.prog_level}</span>
               <span>🖥️ {p.delivery_mode}</span>
               {p.certificate === "Y" && <span>📜 بشهادة</span>}
             </div>
