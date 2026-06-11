@@ -48,7 +48,13 @@ CREATE TABLE RE_USERS (
 );
 CREATE INDEX re_users_type_ix    ON RE_USERS (user_type);
 CREATE INDEX re_users_org_ix     ON RE_USERS (org_id);
-CREATE UNIQUE INDEX re_users_prov_ix ON RE_USERS (auth_provider, provider_sub);
+-- يُفرض التفرّد على هويات الدخول الاجتماعي فقط (حين provider_sub غير NULL).
+-- مستخدمو LOCAL (provider_sub=NULL) تصبح مفاتيحهم كلها NULL فلا يخضعون للقيد،
+-- مما يسمح بعددٍ غير محدود من حسابات البريد المحلي.
+CREATE UNIQUE INDEX re_users_prov_ix ON RE_USERS (
+  CASE WHEN provider_sub IS NULL THEN NULL ELSE auth_provider END,
+  CASE WHEN provider_sub IS NULL THEN NULL ELSE provider_sub END
+);
 
 -- ----------------------------------------------------------------------------
 --  الأدوار (RBAC)
