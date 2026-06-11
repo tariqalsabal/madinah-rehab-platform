@@ -38,7 +38,12 @@ api.interceptors.response.use(
 );
 
 // ===== دوال مساعدة لكل مورد =====
-import type { Job, TrainingProgram, MatchResult, DashboardKpis, OrdsFeed } from "./types";
+import type { Job, TrainingProgram, MatchResult, DashboardKpis, OrdsFeed, Organization } from "./types";
+
+export const CompaniesApi = {
+  list: (params?: { type?: string }) =>
+    api.get<OrdsFeed<Organization>>("/companies", { params }).then((r) => r.data),
+};
 
 export const JobsApi = {
   list: (params?: { q?: string; city?: string; offset?: number }) =>
@@ -63,6 +68,16 @@ export const ApplicationsApi = {
 
 export const DashboardApi = {
   kpis: () => api.get<DashboardKpis>("/dashboard/kpis").then((r) => r.data),
+};
+
+export const AuthApi = {
+  register: (payload: {
+    email: string;
+    full_name: string;
+    password: string;
+    user_type?: string;
+    phone?: string;
+  }) => api.post<{ user_id: number; status: string }>("/auth/register", payload).then((r) => r.data),
 };
 
 export const LettersApi = {

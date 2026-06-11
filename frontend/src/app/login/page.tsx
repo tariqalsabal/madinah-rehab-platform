@@ -36,10 +36,17 @@ export default function LoginPage() {
 
         <div className="my-4 text-center text-xs text-muted-foreground">أو</div>
         <div className="space-y-2">
-          <button onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="w-full rounded-md border py-2 text-sm font-medium">الدخول عبر Google</button>
-          <button onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
-            className="w-full rounded-md border py-2 text-sm font-medium">الدخول عبر Facebook</button>
+          <button disabled title="يتطلب إعداد مزوّد OAuth"
+            className="w-full cursor-not-allowed rounded-md border py-2 text-sm font-medium text-muted-foreground opacity-60">
+            الدخول عبر Google
+          </button>
+          <button disabled title="يتطلب إعداد مزوّد OAuth"
+            className="w-full cursor-not-allowed rounded-md border py-2 text-sm font-medium text-muted-foreground opacity-60">
+            الدخول عبر Facebook
+          </button>
+          <p className="text-center text-[11px] text-muted-foreground">
+            الدخول عبر Google/Facebook سيُفعّل بعد ربط مفاتيح OAuth.
+          </p>
         </div>
         <p className="mt-4 text-center text-sm text-muted-foreground">
           ليس لديك حساب؟ <a href="/register" className="text-brand">سجّل الآن</a>

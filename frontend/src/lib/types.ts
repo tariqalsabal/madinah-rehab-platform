@@ -42,6 +42,18 @@ export interface TrainingProgram {
   field_name?: string;
 }
 
+export interface Organization {
+  org_id: number;
+  org_type: "COMPANY" | "INSTITUTE" | "RECRUITER" | "DONOR";
+  legal_name: string;
+  brand_name?: string;
+  sector?: string;
+  city?: string;
+  region?: string;
+  logo_url?: string;
+  website?: string;
+}
+
 export interface MatchResult {
   target_type: "JOB" | "TRAINING";
   score: number;
