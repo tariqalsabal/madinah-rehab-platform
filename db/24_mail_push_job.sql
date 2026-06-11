@@ -5,10 +5,10 @@
 --  هذه المهمّة تدفع الطابور كل دقيقة فتُرسَل كل رسائل الأحداث آلياً.
 --  متطلّب مسبق: ضبط SMTP على المثيل (راجع 23 وتعليمات الإعداد).
 --  ينفّذ مرّة واحدة بحساب سكيمة المنصة (WKSP_MCW).
---  ملاحظة مهمّة: في جلسة المهمّة المجدوَلة لا يوجد سياق APEX، فالعرض
---  apex_workspace_schemas يُرجع صفر صفوف. لذلك نثبّت رقم مساحة العمل مباشرةً
---  (security group id) — استبدله برقمك (يظهر من: apex_util.set_security_group_id
---  أو طباعة workspace_id من apex_workspace_schemas داخل جلسة Database Actions).
+--  ملاحظة مهمّة: في جلسة المهمّة المجدوَلة المجرّدة، apex_util.set_security_group_id
+--  يفشل بـ ORA-20987 ("Security Group ID is invalid") لعدم وجود هويّة مساحة عمل.
+--  الحل القياسي: إنشاء جلسة APEX حقيقية عبر apex_session.create_session باستخدام
+--  أي تطبيق في مساحة العمل (هنا 101)، فتصبح الهويّة صالحة وينجح push_queue.
 -- =============================================================================
 BEGIN
   BEGIN DBMS_SCHEDULER.DROP_JOB('RE_MAIL_PUSH_JOB', force => TRUE); EXCEPTION WHEN OTHERS THEN NULL; END;
@@ -16,7 +16,11 @@ BEGIN
   DBMS_SCHEDULER.CREATE_JOB(
     job_name        => 'RE_MAIL_PUSH_JOB',
     job_type        => 'PLSQL_BLOCK',
-    job_action      => 'BEGIN apex_util.set_security_group_id(9421272729640104); apex_mail.push_queue; COMMIT; END;',
+    job_action      => q'[BEGIN
+        apex_session.create_session(p_app_id => 101, p_page_id => 1, p_username => 'ADMIN');
+        apex_mail.push_queue;
+        COMMIT;
+      END;]',
     start_date      => SYSTIMESTAMP,
     repeat_interval => 'FREQ=MINUTELY;INTERVAL=1',
     enabled         => TRUE);
