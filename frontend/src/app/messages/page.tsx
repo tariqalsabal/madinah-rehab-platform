@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useMe } from "@/lib/useMe";
-import { MessagesApi } from "@/lib/api";
+import { MessagesApi, PublicApi } from "@/lib/api";
 import { Empty } from "@/components/dashboards/shared";
 
 function Messages() {
@@ -16,6 +16,7 @@ function Messages() {
   const endRef = useRef<HTMLDivElement>(null);
 
   const convos = useQuery({ queryKey: ["convos", userId], queryFn: () => MessagesApi.conversations(userId), enabled: !!userId, refetchInterval: 15000 });
+  const support = useQuery({ queryKey: ["support"], queryFn: () => PublicApi.support(), enabled: !!userId });
   const thread = useQuery({ queryKey: ["thread", userId, peer], queryFn: () => MessagesApi.thread(userId, peer!), enabled: !!userId && !!peer, refetchInterval: 8000 });
   const send = useMutation({
     mutationFn: () => MessagesApi.send(userId, peer!, text),
@@ -31,6 +32,10 @@ function Messages() {
       {/* قائمة المحادثات */}
       <div className="card-brand overflow-y-auto">
         <h2 className="mb-3 font-semibold text-brand-dark">المحادثات</h2>
+        {support.data?.user_id && support.data.user_id !== userId && (
+          <button onClick={() => setPeer(support.data.user_id)}
+            className="mb-3 w-full rounded-lg bg-gold-light px-3 py-2 text-sm font-medium text-gold-dark">+ مراسلة الجمعية</button>
+        )}
         {convos.isLoading ? <Empty text="…" /> : !convos.data?.length ? <Empty text="لا محادثات بعد." /> : (
           <ul className="space-y-1">
             {convos.data.map((c: any) => (

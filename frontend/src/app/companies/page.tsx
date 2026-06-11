@@ -47,7 +47,7 @@ export default function CompaniesPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {data?.items.map((o) => (
-          <div key={o.org_id} className="card-brand">
+          <a key={o.org_id} href={`/companies/${o.org_id}`} className="card-brand block hover:border-brand hover:shadow-md">
             <div className="flex items-start justify-between">
               <h3 className="font-semibold text-brand-dark">{o.brand_name || o.legal_name}</h3>
               <span className="badge">{TYPE_LABEL[o.org_type]}</span>
@@ -57,12 +57,8 @@ export default function CompaniesPage() {
               {o.sector && <span>🏷️ {o.sector}</span>}
               {o.city && <span>📍 {o.city}</span>}
             </div>
-            {o.website && (
-              <a href={o.website} target="_blank" rel="noreferrer" className="mt-3 inline-block text-xs text-brand">
-                الموقع الإلكتروني ↗
-              </a>
-            )}
-          </div>
+            <span className="mt-3 inline-block text-xs text-brand">عرض الملف ←</span>
+          </a>
         ))}
       </div>
 

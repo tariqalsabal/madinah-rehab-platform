@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMe } from "@/lib/useMe";
-import { ProfileApi, OrgProfileApi } from "@/lib/api";
+import { ProfileApi, OrgProfileApi, docDownloadUrl } from "@/lib/api";
 import { Card, Input, SelectField, EDU_OPTIONS, Empty } from "@/components/dashboards/shared";
 
 const TYPE_AR: Record<string, string> = {
@@ -131,6 +131,7 @@ function BeneficiaryProfile({ userId, benefId }: { userId: number; benefId: numb
       <DocumentsCard
         docs={docs.data}
         types={[{ v: "CV", l: "السيرة الذاتية" }, { v: "ID", l: "الهوية/الإقامة" }, { v: "CERTIFICATE", l: "شهادة" }, { v: "OTHER", l: "أخرى" }]}
+        onUpload={(t, ti, file) => ProfileApi.uploadDocument(userId, t, ti, file)}
         onAdd={(t, ti, u) => ProfileApi.addDocument(userId, t, ti, u)}
         onAdded={() => qc.invalidateQueries({ queryKey: ["my-docs", userId] })}
       />
@@ -191,6 +192,7 @@ function OrgProfile({ userId, orgType }: { userId: number; orgType: string }) {
       <DocumentsCard
         docs={docs.data}
         types={[{ v: "CR", l: "السجل التجاري" }, { v: "NATIONAL_ADDRESS", l: "العنوان الوطني" }, { v: "IBAN", l: "شهادة الآيبان" }, { v: "BANK", l: "الشهادة البنكية" }, { v: "LICENSE", l: "الترخيص" }, { v: "OTHER", l: "أخرى" }]}
+        onUpload={(t, ti, file) => OrgProfileApi.uploadDocument(userId, t, ti, file)}
         onAdd={(t, ti, u) => OrgProfileApi.addDocument(userId, t, ti, u)}
         onAdded={() => qc.invalidateQueries({ queryKey: ["org-docs", userId] })}
       />
@@ -198,27 +200,52 @@ function OrgProfile({ userId, orgType }: { userId: number; orgType: string }) {
   );
 }
 
-function DocumentsCard({ docs, types, onAdd, onAdded }: { docs: any[]; types: { v: string; l: string }[]; onAdd: (t: string, ti: string, u: string) => Promise<any>; onAdded: () => void }) {
-  const [f, setF] = useState({ doc_type: types[0].v, title: "", url: "" });
-  const add = useMutation({ mutationFn: () => onAdd(f.doc_type, f.title, f.url), onSuccess: () => { setF({ doc_type: types[0].v, title: "", url: "" }); onAdded(); } });
+function DocumentsCard({ docs, types, onUpload, onAdd, onAdded }: {
+  docs: any[]; types: { v: string; l: string }[];
+  onUpload: (t: string, ti: string, file: File) => Promise<any>;
+  onAdd: (t: string, ti: string, u: string) => Promise<any>; onAdded: () => void;
+}) {
+  const [docType, setDocType] = useState(types[0].v);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setErr("");
+    try {
+      if (file) await onUpload(docType, title || file.name, file);
+      else if (url) await onAdd(docType, title, url);
+      setTitle(""); setUrl(""); setFile(null); onAdded();
+    } catch (e: any) { setErr(e.message || "تعذّر الرفع"); } finally { setBusy(false); }
+  }
+
   return (
     <Card title="المرفقات">
-      <p className="mb-3 text-xs text-muted-foreground">أضف رابط الملف (Drive/أي مستضيف). رفع الملفات المباشر قيد الإضافة.</p>
+      <p className="mb-3 text-xs text-muted-foreground">ارفع الملف مباشرةً، أو أضف رابطاً.</p>
       {docs?.length ? (
         <ul className="mb-4 space-y-2">
           {docs.map((d) => (
             <li key={d.doc_id} className="flex items-center justify-between rounded-lg border p-2 text-sm">
               <span><span className="badge">{types.find((t) => t.v === d.doc_type)?.l || d.doc_type}</span> {d.title}</span>
-              {d.file_url && <a href={d.file_url} target="_blank" rel="noreferrer" className="text-xs text-brand">فتح ↗</a>}
+              <a href={d.file_url || docDownloadUrl(d.doc_id)} target="_blank" rel="noreferrer" className="text-xs text-brand">فتح ↗</a>
             </li>
           ))}
         </ul>
       ) : <p className="mb-4 text-sm text-muted-foreground">لا مرفقات بعد.</p>}
-      <form onSubmit={(e) => { e.preventDefault(); add.mutate(); }} className="grid gap-2 sm:grid-cols-4">
-        <SelectField value={f.doc_type} onChange={(e: any) => setF({ ...f, doc_type: e.target.value })} options={types} />
-        <Input placeholder="عنوان الملف" value={f.title} onChange={(e: any) => setF({ ...f, title: e.target.value })} />
-        <Input placeholder="رابط الملف" value={f.url} onChange={(e: any) => setF({ ...f, url: e.target.value })} />
-        <button type="submit" disabled={add.isPending || !f.url} className="btn-primary text-sm disabled:opacity-60">إضافة</button>
+      <form onSubmit={submit} className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2">
+          <SelectField value={docType} onChange={(e: any) => setDocType(e.target.value)} options={types} />
+          <Input placeholder="عنوان الملف (اختياري)" value={title} onChange={(e: any) => setTitle(e.target.value)} />
+        </div>
+        <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)}
+          className="block w-full text-sm file:me-3 file:rounded-lg file:border-0 file:bg-brand file:px-3 file:py-1.5 file:text-white" />
+        {!file && <Input placeholder="أو الصق رابط الملف" value={url} onChange={(e: any) => setUrl(e.target.value)} />}
+        {err && <p className="text-sm text-red-600">{err}</p>}
+        <button type="submit" disabled={busy || (!file && !url)} className="btn-primary text-sm disabled:opacity-60">
+          {busy ? "جارٍ الرفع…" : "إضافة المرفق"}
+        </button>
       </form>
     </Card>
   );

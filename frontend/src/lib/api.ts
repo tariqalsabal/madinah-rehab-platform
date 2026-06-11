@@ -109,6 +109,23 @@ export const AppApi = {
     api.post(`/applications/status`, { application_id, new_status, actor, note }).then((r) => r.data),
 };
 
+// رابط تنزيل ملف مخزّن (BLOB)
+export const docDownloadUrl = (docId: number) => `${baseURL}/documents/${docId}/download`;
+
+// رفع ملف مباشر (مستفيد/منظمة)
+function uploadFile(path: string, uid: number, doc_type: string, title: string, file: File) {
+  return api.post(path, file, {
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+    params: { uid, doc_type, title, filename: file.name, content_type: file.type || "application/octet-stream" },
+  }).then((r) => r.data);
+}
+
+// بروفايل عام للمنظمة + جهة تواصل الجمعية
+export const PublicApi = {
+  org: (id: number) => api.get(`/organizations/${id}`).then((r) => one<any>(r.data)),
+  support: () => api.get(`/support-contact`).then((r) => one<any>(r.data)),
+};
+
 // البروفايل والمرفقات
 export const ProfileApi = {
   update: (uid: number, payload: any) => api.post(`/me/profile`, { uid, ...payload }).then((r) => r.data),
@@ -117,6 +134,8 @@ export const ProfileApi = {
   documents: (uid: number) => api.get(`/me/documents`, { params: { uid } }).then((r) => feed<any>(r.data)),
   addDocument: (uid: number, doc_type: string, title: string, url: string) =>
     api.post(`/documents`, { uid, doc_type, title, url }).then((r) => r.data),
+  uploadDocument: (uid: number, doc_type: string, title: string, file: File) =>
+    uploadFile(`/documents/upload`, uid, doc_type, title, file),
 };
 
 // بروفايل المنظمة (شركة/معهد/مانح)
@@ -126,6 +145,8 @@ export const OrgProfileApi = {
   documents: (uid: number) => api.get(`/me/org/documents`, { params: { uid } }).then((r) => feed<any>(r.data)),
   addDocument: (uid: number, doc_type: string, title: string, url: string) =>
     api.post(`/org/documents`, { uid, doc_type, title, url }).then((r) => r.data),
+  uploadDocument: (uid: number, doc_type: string, title: string, file: File) =>
+    uploadFile(`/org/documents/upload`, uid, doc_type, title, file),
 };
 
 // المراسلات الداخلية

@@ -9,9 +9,12 @@ import { NotificationsApi, MessagesApi } from "@/lib/api";
 
 const NAV = [
   { h: "/jobs", t: "الوظائف" },
-  { h: "/programs", t: "البرامج التدريبية" },
+  { h: "/programs", t: "البرامج" },
   { h: "/companies", t: "الشركاء" },
-  { h: "/dashboard", t: "لوحة التحكم" },
+  { h: "/about", t: "عن الجمعية" },
+  { h: "/success-stories", t: "قصص نجاح" },
+  { h: "/faq", t: "الأسئلة" },
+  { h: "/contact", t: "تواصل بنا" },
 ];
 
 export function Header() {
@@ -41,8 +44,8 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden gap-7 text-sm font-medium lg:flex">
-          {NAV.map((n) => <Link key={n.h} href={n.h} className="transition hover:text-gold-light">{n.t}</Link>)}
+        <nav className="hidden gap-5 text-[13px] font-medium xl:flex">
+          {NAV.map((n) => <Link key={n.h} href={n.h} className="whitespace-nowrap transition hover:text-gold-light">{n.t}</Link>)}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -86,13 +89,15 @@ export function Header() {
           ) : (
             <Link href="/login" className="btn-gold text-sm">دخول</Link>
           )}
-          <button onClick={() => setOpen((o) => !o)} className="lg:hidden" aria-label="القائمة">{open ? <X /> : <Menu />}</button>
+          <button onClick={() => setOpen((o) => !o)} className="xl:hidden" aria-label="القائمة">{open ? <X /> : <Menu />}</button>
         </div>
       </div>
 
       {open && (
-        <nav className="container flex flex-col gap-1 pb-4 text-sm lg:hidden">
+        <nav className="container flex flex-col gap-1 pb-4 text-sm xl:hidden">
           {NAV.map((n) => <Link key={n.h} href={n.h} onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-white/10">{n.t}</Link>)}
+          {authed && <Link href="/dashboard" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-white/10">لوحة التحكم</Link>}
+          {authed && <Link href="/profile" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-white/10">ملفي</Link>}
           {authed && <Link href="/messages" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 hover:bg-white/10">الرسائل {unreadM > 0 ? `(${unreadM})` : ""}</Link>}
           {authed
             ? <button onClick={() => signOut({ callbackUrl: "/" })} className="rounded-md px-2 py-2 text-right hover:bg-white/10">خروج</button>
