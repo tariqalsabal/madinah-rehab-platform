@@ -119,6 +119,15 @@ export const ProfileApi = {
     api.post(`/documents`, { uid, doc_type, title, url }).then((r) => r.data),
 };
 
+// بروفايل المنظمة (شركة/معهد/مانح)
+export const OrgProfileApi = {
+  getMine: (uid: number) => api.get(`/me/org`, { params: { uid } }).then((r) => one<any>(r.data)),
+  update: (uid: number, payload: any) => api.post(`/me/org`, { uid, ...payload }).then((r) => r.data),
+  documents: (uid: number) => api.get(`/me/org/documents`, { params: { uid } }).then((r) => feed<any>(r.data)),
+  addDocument: (uid: number, doc_type: string, title: string, url: string) =>
+    api.post(`/org/documents`, { uid, doc_type, title, url }).then((r) => r.data),
+};
+
 // المراسلات الداخلية
 export const MessagesApi = {
   conversations: (uid: number) => api.get(`/me/conversations`, { params: { uid } }).then((r) => feed<any>(r.data)),

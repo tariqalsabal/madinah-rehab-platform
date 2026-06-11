@@ -29,11 +29,16 @@ export default function BeneficiaryProfileView() {
   if (error || !p) return <p className="text-red-600">تعذّر تحميل الملف.</p>;
 
   const rows: [string, any][] = [
-    ["المدينة", p.city], ["الجنسية", p.is_saudi === "Y" ? "سعودي" : "مقيم"],
-    ["المؤهل", p.education_level], ["التخصص", p.major], ["سنة التخرج", p.graduation_year],
-    ["الخبرة (سنوات)", p.experience_years], ["الحالة", STAT_AR[p.current_status] || p.current_status],
-    ["المسميات المرغوبة", p.desired_titles], ["نوع العمل المفضّل", WORK_AR[p.work_type_pref] || p.work_type_pref],
-    ["بيئة العمل", p.work_env_pref], ["المهارات", p.skills], ["نبذة", p.summary],
+    ["المدينة", p.city], ["المنطقة", p.region], ["الجنسية", p.is_saudi === "Y" ? "سعودي" : "مقيم"],
+    ["رقم الهوية", p.national_id], ["الحالة الاجتماعية", p.marital_status],
+    ["المؤهل", p.education_level], ["التخصص", p.major], ["الجامعة", p.university], ["المعدل", p.gpa], ["سنة التخرج", p.graduation_year],
+    ["اللغات", p.languages], ["الخبرة (سنوات)", p.experience_years], ["الحالة", STAT_AR[p.current_status] || p.current_status],
+    ["المسمّى الحالي", p.current_job_title], ["جهة العمل الحالية", p.current_employer], ["فترة الإشعار", p.notice_period],
+    ["رخصة قيادة", p.has_license === "Y" ? "نعم" : null], ["سيارة خاصة", p.has_car === "Y" ? "نعم" : null],
+    ["من ذوي الاحتياجات", p.special_needs === "Y" ? (p.special_needs_type || "نعم") : null],
+    ["المسميات المرغوبة", p.desired_titles], ["الراتب المتوقّع", p.desired_min_salary],
+    ["نوع العمل المفضّل", WORK_AR[p.work_type_pref] || p.work_type_pref], ["بيئة العمل", p.work_env_pref],
+    ["المهارات", p.skills], ["LinkedIn", p.linkedin_url], ["نبذة", p.summary],
   ];
 
   return (

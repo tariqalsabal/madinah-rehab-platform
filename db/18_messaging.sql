@@ -49,7 +49,7 @@ BEGIN
           FROM RE_MESSAGES
          WHERE (from_user=:uid AND to_user=:peer) OR (from_user=:peer AND to_user=:uid);
         COMMIT;
-        :status_code := 200; HTP.P(NVL(v, '[]'));
+        :status_code := 200; HTP.P(NVL(v, CHR(91)||CHR(93)));  -- CHR(91)=[ CHR(93)=] لتفادي إنهاء q-quote
       END; ]');
 
   -- POST /messages : إرسال رسالة + إشعار  body:{from_uid,to_uid,body,application_id}
