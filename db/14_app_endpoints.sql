@@ -23,7 +23,7 @@ BEGIN
   ----------------------------------------------------------------------------
   ORDS.DEFINE_TEMPLATE(p_module_name=>'rehab.api.v1', p_pattern=>'me');
   ORDS.DEFINE_HANDLER(p_module_name=>'rehab.api.v1', p_pattern=>'me', p_method=>'GET',
-    p_source_type=>ORDS.source_type_query_one, p_source=>q'[
+    p_source_type=>ORDS.source_type_collection_feed, p_source=>q'[
       SELECT u.user_id, u.full_name, u.email, u.user_type, u.status, u.org_id,
              (SELECT benef_id FROM RE_BENEFICIARIES b WHERE b.user_id=u.user_id) AS benef_id,
              (SELECT LISTAGG(r.role_code, ',') WITHIN GROUP (ORDER BY r.role_code)
