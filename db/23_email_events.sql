@@ -62,9 +62,10 @@ CREATE OR REPLACE PACKAGE BODY RE_MAIL_PKG AS
 
   PROCEDURE send_event(p_event_code VARCHAR2, p_subject VARCHAR2, p_html CLOB,
                        p_blob BLOB DEFAULT NULL, p_filename VARCHAR2 DEFAULT NULL, p_mime VARCHAR2 DEFAULT NULL) IS
-    l_to  VARCHAR2(254);
-    l_id  NUMBER;
-    l_grp NUMBER;
+    l_to   VARCHAR2(254);
+    l_id   NUMBER;
+    l_grp  NUMBER;
+    l_body CLOB;  -- CLOB لتفادي غموض overload في apex_mail.send
   BEGIN
     BEGIN
       SELECT email INTO l_to FROM RE_EVENT_TYPES WHERE event_code = p_event_code AND active = 'Y';
@@ -77,11 +78,12 @@ CREATE OR REPLACE PACKAGE BODY RE_MAIL_PKG AS
       apex_util.set_security_group_id(l_grp);
     EXCEPTION WHEN OTHERS THEN NULL; END;
 
+    l_body := TO_CLOB('إشعار من منصة التأهيل والتوظيف (افتح بصيغة HTML).');
     l_id := apex_mail.send(
               p_to        => l_to,
               p_from      => 'info@mcw.sa',
               p_subj      => p_subject,
-              p_body      => 'إشعار من منصة التأهيل والتوظيف (افتح بصيغة HTML).',
+              p_body      => l_body,
               p_body_html => p_html);
 
     IF p_blob IS NOT NULL AND DBMS_LOB.getlength(p_blob) > 0 THEN
