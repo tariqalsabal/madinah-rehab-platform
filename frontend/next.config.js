@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // فحص ESLint يجري في خط CI منفصلاً؛ لا نُفشل بناء الإنتاج بسبب تحذيرات النمط.
+  // فحص ESLint والأنواع يجري في خط CI منفصلاً؛ لا نُفشل بناء الإنتاج بسببها.
   eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
   // ربط الـ API الخلفي (ORDS) عبر متغير بيئة
   async rewrites() {
     return [

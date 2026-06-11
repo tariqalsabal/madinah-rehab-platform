@@ -54,6 +54,7 @@ export const JobsApi = {
 export const ProgramsApi = {
   list: (params?: { offset?: number }) =>
     api.get<OrdsFeed<TrainingProgram>>("/programs", { params }).then((r) => r.data),
+  get: (id: number) => api.get(`/programs/${id}`).then((r) => one<any>(r.data)),
 };
 
 export const MatchApi = {
@@ -64,6 +65,8 @@ export const MatchApi = {
 export const ApplicationsApi = {
   applyJob: (benef_id: number, job_id: number, cover_note?: string) =>
     api.post<{ application_id: number }>("/applications/job", { benef_id, job_id, cover_note }).then((r) => r.data),
+  applyProgram: (benef_id: number, program_id: number) =>
+    api.post<{ application_id: number }>("/applications/program", { benef_id, program_id }).then((r) => r.data),
 };
 
 // بعض نقاط ORDS تُغلّف النتيجة المفردة داخل items[] — نفكّها بأمان.

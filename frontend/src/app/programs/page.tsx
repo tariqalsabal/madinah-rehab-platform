@@ -18,7 +18,7 @@ export default function ProgramsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {data?.items.map((p) => (
-          <div key={p.program_id} className="card-brand">
+          <a key={p.program_id} href={`/programs/${p.program_id}`} className="card-brand block hover:border-brand hover:shadow-md">
             <div className="flex items-start justify-between">
               <h3 className="font-semibold text-brand-dark">{p.title}</h3>
               {p.is_free === "Y" ? (
@@ -38,7 +38,7 @@ export default function ProgramsPage() {
               مقاعد متاحة: {p.seats_available}
               {p.start_date ? ` · يبدأ ${String(p.start_date).slice(0, 10)}` : ""}
             </p>
-          </div>
+          </a>
         ))}
       </div>
 
