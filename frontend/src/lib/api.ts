@@ -176,6 +176,7 @@ export const AdminApi = {
   beneficiaries: (actor: number) => api.get(`/admin/beneficiaries`, { params: { actor } }).then((r) => feed<any>(r.data)),
   approveBeneficiary: (benef_id: number, status: string, actor: number) =>
     api.post(`/beneficiaries/approve`, { benef_id, status, actor }).then((r) => r.data),
+  messages: (actor: number) => api.get(`/admin/messages`, { params: { actor } }).then((r) => feed<any>(r.data)),
 };
 
 export const AuthApi = {

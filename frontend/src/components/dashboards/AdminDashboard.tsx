@@ -17,7 +17,7 @@ const KPIS: { key: keyof DashboardKpis; label: string; suffix?: string }[] = [
   { key: "total_donation_value", label: "قيمة التبرعات", suffix: " ر.س" },
 ];
 
-const TABS = [["users", "الحسابات"], ["benef", "المستفيدون"], ["apps", "الطلبات"], ["donations", "التبرعات"]] as const;
+const TABS = [["users", "الحسابات"], ["benef", "المستفيدون"], ["apps", "الطلبات"], ["donations", "التبرعات"], ["messages", "الرسائل"]] as const;
 
 function filterRows(rows: any[] | undefined, q: string) {
   if (!rows) return [];
@@ -35,6 +35,7 @@ export default function AdminDashboard({ actor }: { actor: number }) {
   const benef = useQuery({ queryKey: ["admin-benef", actor], queryFn: () => AdminApi.beneficiaries(actor), enabled: tab === "benef" });
   const apps = useQuery({ queryKey: ["admin-apps", actor], queryFn: () => AdminApi.applications(actor), enabled: tab === "apps" });
   const dons = useQuery({ queryKey: ["admin-dons", actor], queryFn: () => AdminApi.donations(actor), enabled: tab === "donations" });
+  const msgs = useQuery({ queryKey: ["admin-msgs", actor], queryFn: () => AdminApi.messages(actor), enabled: tab === "messages", refetchInterval: 20000 });
 
   const setUserStatus = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => AdminApi.setUserStatus(id, status, actor),
@@ -45,7 +46,7 @@ export default function AdminDashboard({ actor }: { actor: number }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-benef", actor] }),
   });
 
-  const current = tab === "users" ? users.data : tab === "benef" ? benef.data : tab === "apps" ? apps.data : dons.data;
+  const current = tab === "users" ? users.data : tab === "benef" ? benef.data : tab === "apps" ? apps.data : tab === "messages" ? msgs.data : dons.data;
   const filtered = useMemo(() => filterRows(current, q), [current, q]);
 
   return (
@@ -146,6 +147,23 @@ export default function AdminDashboard({ actor }: { actor: number }) {
                   <td className="px-2 py-2">{d.units_pledged}</td>
                   <td className="px-2 py-2">{d.units_consumed} ({d.consumed_pct}%)</td>
                   <td className="px-2 py-2"><Badge status={d.status} /></td>
+                </tr>
+              ))}
+            </Table>
+          )}
+        </Card>
+      )}
+
+      {tab === "messages" && (
+        <Card title={`كل الرسائل (${filtered.length})`}>
+          {msgs.isLoading ? <Empty text="جارٍ التحميل…" /> : !filtered.length ? <Empty text="لا رسائل" /> : (
+            <Table head={["من", "إلى", "الرسالة", "التاريخ"]}>
+              {filtered.map((m: any) => (
+                <tr key={m.message_id} className="border-b">
+                  <td className="px-2 py-2 font-medium text-brand-dark">{m.from_name}</td>
+                  <td className="px-2 py-2">{m.to_name}</td>
+                  <td className="px-2 py-2 text-muted-foreground">{m.body}</td>
+                  <td className="px-2 py-2 text-xs text-muted-foreground" dir="ltr">{m.created_at}</td>
                 </tr>
               ))}
             </Table>
