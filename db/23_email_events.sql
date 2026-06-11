@@ -64,24 +64,20 @@ CREATE OR REPLACE PACKAGE BODY RE_MAIL_PKG AS
                        p_blob BLOB DEFAULT NULL, p_filename VARCHAR2 DEFAULT NULL, p_mime VARCHAR2 DEFAULT NULL) IS
     l_to   VARCHAR2(254);
     l_id   NUMBER;
-    l_grp  NUMBER;
     l_body CLOB;  -- CLOB لتفادي غموض overload في apex_mail.send
   BEGIN
     BEGIN
       SELECT email INTO l_to FROM RE_EVENT_TYPES WHERE event_code = p_event_code AND active = 'Y';
     EXCEPTION WHEN NO_DATA_FOUND THEN RETURN; END; -- نوع معطّل/غير معرّف → تجاهل
 
-    -- ضبط سياق مساحة العمل لإتاحة APEX_MAIL خارج جلسة APEX
-    BEGIN
-      SELECT workspace_id INTO l_grp FROM apex_workspace_schemas
-       WHERE schema = SYS_CONTEXT('USERENV','CURRENT_SCHEMA') AND ROWNUM = 1;
-      apex_util.set_security_group_id(l_grp);
-    EXCEPTION WHEN OTHERS THEN NULL; END;
+    -- تثبيت مساحة العمل مباشرةً (السياق غير متوفّر داخل Trigger/ORDS؛
+    -- apex_workspace_schemas مُرشّح بالسياق فيُرجع صفر صفوف هناك). استبدل الرقم برقمك.
+    apex_util.set_security_group_id(9421272729640104);
 
     l_body := TO_CLOB('إشعار من منصة التأهيل والتوظيف (افتح بصيغة HTML).');
     l_id := apex_mail.send(
               p_to        => l_to,
-              p_from      => 'info@mcw.sa',
+              p_from      => 'tareq.alsabal@mcw.sa',
               p_subj      => p_subject,
               p_body      => l_body,
               p_body_html => p_html);
