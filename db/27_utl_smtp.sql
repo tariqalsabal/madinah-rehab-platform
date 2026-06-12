@@ -7,12 +7,20 @@
 
 -- ── الخطوة 1: ACL للسكيمة WKSP_MCW (تُنفَّذ بحساب ADMIN) ──────────────────────
 -- ملاحظة: ACL محرّك APEX (APEX_240200/SMTP) لا يكفي لـ UTL_SMTP من WKSP_MCW.
-/*  شغّل هذا بحساب ADMIN:
-BEGIN
+-- مهم: 'resolve' لا تقبل منفذاً → تُضاف في نداء منفصل بلا port (وإلا ORA-24244).
+/*  شغّل هذا بحساب ADMIN (نداءان):
+BEGIN  -- (أ) connect مع المنفذ
   DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(
-    host       => 'smtp.office365.com', lower_port => 587, upper_port => 587,
-    ace => xs$ace_type(privilege_list => xs$name_list('connect','resolve'),
-                       principal_name => 'WKSP_MCW', principal_type => xs_acl.ptype_db));
+    host => 'smtp.office365.com', lower_port => 587, upper_port => 587,
+    ace  => xs$ace_type(privilege_list => xs$name_list('connect'),
+                        principal_name => 'WKSP_MCW', principal_type => xs_acl.ptype_db));
+END;
+/
+BEGIN  -- (ب) resolve بلا منفذ
+  DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(
+    host => 'smtp.office365.com',
+    ace  => xs$ace_type(privilege_list => xs$name_list('resolve'),
+                        principal_name => 'WKSP_MCW', principal_type => xs_acl.ptype_db));
 END;
 /
 */
